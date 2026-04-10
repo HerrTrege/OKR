@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI OKR Generator – Dynamics 365</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg-main: #020617;
+      --bg-card: #0f172a;
+      --border: #1e293b;
+      --text-main: #e5e7eb;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #1e1b4b, transparent),
+        radial-gradient(1200px 600px at 100% 10%, #0f766e, transparent),
+        var(--bg-main);
+      color: var(--text-main);
+      padding: 48px;
+    }
+
+    .container { max-width: 1200px; margin: auto; }
+
+    header { margin-bottom: 48px; }
+    header h1 { font-size: 34px; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 720px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 32px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+
+    label { display: block; margin-top: 18px; color: var(--text-muted); }
+    select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-main);
+    }
+
+    button {
+      margin-top: 28px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+    }
+
+    .okr-card {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI‑assisted OKR Generator</h1>
+  <p>
+    Phase‑aware, governance‑correct OKRs for Dynamics 365 delivery.
+  </p>
+</header>
+
+<div class="layout">
+
+  <!-- INPUT -->
+  <div class="card">
+
+    <label>Industry</label>
+    <select id="industry">
+      <option>Retail</option>
+      <option>Manufacturing</option>
+      <option>Production</option>
+    </select>
+
+    <label>Project type</label>
+    <select id="projectType">
+      <option>Implementation</option>
+      <option>AM</option>
+    </select>
+
+    <label>Stream</label>
+    <select id="stream">
+      <option>Commerce</option>
+      <option>SCM</option>
+      <option>Finance</option>
+      <option>Tech</option>
+      <option>Production</option>
+      <option>Support</option>
+    </select>
+
+    <label>Project phase</label>
+    <select id="phase">
+      <option>Mobilisation</option>
+      <option>Design (Fit-to-Standard)</option>
+      <option>Build</option>
+      <option>Test (SIT / UAT)</option>
+      <option>Go-Live</option>
+      <option>Stabilisation</option>
+    </select>
+
+    <label>Audience</label>
+    <select id="audience">
+      <option>Steering group</option>
+      <option>Leadership team</option>
+      <option>Working stream</option>
+    </select>
+
+    <button onclick="generateOKRs()">Generate 5 OKRs</button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="card">
+    <div id="result">Select context and generate OKRs.</div>
+  </div>
+
+</div>
+
+<footer>
+  Local mock mode · Phase‑aware · LLM‑ready
+</footer>
+
+</div>
+
+<script>
+function generateOKRs() {
+
+  const context = {
+    industry: document.getElementById("industry").value,
+    projectType: document.getElementById("projectType").value,
+    stream: document.getElementById("stream").value,
+    phase: document.getElementById("phase").value,
+    audience: document.getElementById("audience").value,
+    okrCount: 5
+  };
+
+  // MOCK archetypes — these are what we will later delegate to the LLM
+  const archetypes = {
+    "Design (Fit-to-Standard)": [
+      "Protect user experience against standard degradation",
+      "Harvest legacy best practices into global template",
+      "Establish evidence-based customization governance",
+      "Prevent silent UX regression",
+      "Ensure peer ownership of design decisions"
+    ],
+    "Test (SIT / UAT)": [
+      "Eliminate top legacy pain points",
+      "Give users veto power on critical flows",
+      "Prevent workaround normalization",
+      "Force visibility of real operational pain",
+      "Protect go-live integrity"
+    ],
+    "Build": [
+      "Guarantee first-time-right delivery",
+      "Protect core operations from shortcuts",
+      "Prevent local optimizations breaking global flow",
+      "Maintain quality under delivery pressure",
+      "Ensure operational realism"
+    ]
+  };
+
+  const themes = archetypes[context.phase] || archetypes["Design (Fit-to-Standard)"];
+
+  const okrs = themes.slice(0, context.okrCount).map((theme, i) => ({
+    objective: theme,
+    kpis: [
+      "Explicit approval or veto triggered if defined thresholds are breached",
+      "Named business ownership required for acceptance",
+      "Decision logged and communicated before next phase gate"
+    ]
+  }));
+
+  document.getElementById("result").innerHTML =
+    okrs.map((o, i) => `
+      <div class="okr-card">
+        <strong>Objective ${i + 1}</strong>
+        <p>${o.objective}</p>
+        <strong>Key Results</strong>
+        <ul>${o.kpis.map(k => `<li>${k}</li>`).join("")}</ul>
+      </div>
+    `).join("");
+
+  // This object is what you send to the LLM later:
+  console.log("LLM Context Payload:", context);
+}
+</script>
+
+</body>
+</html>
