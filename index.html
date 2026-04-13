@@ -160,55 +160,42 @@
 </div>
 
 <script>
-function generateOKRs() {
+async function generateOKRs() {
+  const resultDiv = document.getElementById("result");
+  
+  // Give the user some visual feedback while the AI thinks
+  resultDiv.innerHTML = `
+    <div class="okr-card">
+      <p style="text-align: center; color: var(--text-muted);">
+        Analyzing context and generating OKRs... 
+      </p>
+    </div>`;
 
   const context = {
     industry: document.getElementById("industry").value,
     projectType: document.getElementById("projectType").value,
     stream: document.getElementById("stream").value,
     phase: document.getElementById("phase").value,
-    audience: document.getElementById("audience").value,
-    okrCount: 5
+    audience: document.getElementById("audience").value
   };
 
-  // MOCK archetypes — these are what we will later delegate to the LLM
-  const archetypes = {
-    "Design (Fit-to-Standard)": [
-      "Protect user experience against standard degradation",
-      "Harvest legacy best practices into global template",
-      "Establish evidence-based customization governance",
-      "Prevent silent UX regression",
-      "Ensure peer ownership of design decisions"
-    ],
-    "Test (SIT / UAT)": [
-      "Eliminate top legacy pain points",
-      "Give users veto power on critical flows",
-      "Prevent workaround normalization",
-      "Force visibility of real operational pain",
-      "Protect go-live integrity"
-    ],
-    "Build": [
-      "Guarantee first-time-right delivery",
-      "Protect core operations from shortcuts",
-      "Prevent local optimizations breaking global flow",
-      "Maintain quality under delivery pressure",
-      "Ensure operational realism"
-    ]
-  };
+  try {
+    // Call your new Azure Function
+    const response = await fetch('/api/generate-okrs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(context)
+    });
 
-  const themes = archetypes[context.phase] || archetypes["Design (Fit-to-Standard)"];
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-  const okrs = themes.slice(0, context.okrCount).map((theme, i) => ({
-    objective: theme,
-    kpis: [
-      "Explicit approval or veto triggered if defined thresholds are breached",
-      "Named business ownership required for acceptance",
-      "Decision logged and communicated before next phase gate"
-    ]
-  }));
+    // Parse the JSON array we told the backend to return
+    const okrs = await response.json(); 
 
-  document.getElementById("result").innerHTML =
-    okrs.map((o, i) => `
+    // Build the HTML for the results
+    resultDiv.innerHTML = okrs.map((o, i) => `
       <div class="okr-card">
         <strong>Objective ${i + 1}</strong>
         <p>${o.objective}</p>
@@ -217,9 +204,15 @@ function generateOKRs() {
       </div>
     `).join("");
 
-  // This object is what you send to the LLM later:
-  console.log("LLM Context Payload:", context);
+  } catch (error) {
+    console.error("Error calling API:", error);
+    resultDiv.innerHTML = `
+      <div class="okr-card" style="border-color: #ef4444;">
+        <p style="color: #ef4444;">Something went wrong connecting to the AI. Please try again.</p>
+      </div>`;
+  }
 }
+
 </script>
 
 </body>
